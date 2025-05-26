@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaboresExpress</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>SaboresExpress</h1>
+        <p>Administra restaurantes y menús</p>
+        <div class="header-actions">
+            <a href="{{ url_for('logout') }}" class="logout">Cerrar Sesión</a>
+        </div>
+    </header>
+
+    <div class="main-with-sidebar">
+        <div class="sidebar">
+            <h3>Opciones de Administración</h3>
+            <ul class="popular-list">
+                <li><a href="#add-restaurante">Añadir Restaurante</a></li>
+                <li><a href="#add-menu">Añadir Menú</a></li>
+                <li><a href="#existing-restaurantes">Restaurantes Existentes</a></li>
+            </ul>
+        </div>
+
+        <div class="content">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="mensaje">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="admin-tabs">
+                <button class="tab-button active" onclick="openTab('add-restaurante')">Añadir Restaurante</button>
+                <button class="tab-button" onclick="openTab('add-menu')">Añadir Menú</button>
+                <button class="tab-button" onclick="openTab('existing-restaurantes')">Restaurantes Existentes</button>
+            </div>
+
+            <div id="add-restaurante" class="tab-content" style="display: block;">
+                <h2>Añadir Restaurante</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Descripción:</label>
+                        <textarea id="descripcion" name="descripcion"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria">Categoría:</label>
+                        <select id="categoria" name="categoria">
+                            <option value="Sushi">Sushi</option>
+                            <option value="Pollo">Pollo</option>
+                            <option value="Casa China">Casa China</option>
+                            <option value="Comidas Rápidas">Comidas Rápidas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="imagen">Imagen:</label>
+                        <input type="file" id="imagen" name="imagen" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" name="restaurante">Añadir Restaurante</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="add-menu" class="tab-content">
+                <h2>Añadir Menú</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="restaurante_id">Restaurante:</label>
+                        <select id="restaurante_id" name="restaurante_id">
+                            {% for restaurante in restaurantes %}
+                                <option value="{{ restaurante.id }}">{{ restaurante.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre_menu">Nombre:</label>
+                        <input type="text" id="nombre_menu" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion_menu">Descripción:</label>
+                        <textarea id="descripcion_menu" name="descripcion"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="precio">Precio:</label>
+                        <input type="number" id="precio" name="precio" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria_menu">Categoría:</label>
+                        <select id="categoria_menu" name="categoria">
+                            <option value="Entradas">Entradas</option>
+                            <option value="Platos Fuertes">Platos Fuertes</option>
+                            <option value="Bebidas">Bebidas</option>
+                            <option value="Rollitos">Rollitos</option>
+                            <option value="Comidas Rápidas">Comidas Rápidas</option>
+                            <option value="Pizzas">Pizzas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="imagen_menu">Imagen:</label>
+                        <input type="file" id="imagen_menu" name="imagen" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" name="menu">Añadir Menú</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="existing-restaurantes" class="tab-content">
+                <h2>Restaurantes Existentes</h2>
+                {% if restaurantes %}
+                    <table class="carrito-table">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                        {% for restaurante in restaurantes %}
+                            <tr>
+                                <td>{{ restaurante.id }}</td>
+                                <td>{{ restaurante.nombre }}</td>
+                                <td>{{ restaurante.categoria }}</td>
+                                <td>{{ restaurante.descripcion }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('eliminar_restaurante', restaurante_id=restaurante.id) }}" style="display:inline;">
+                                        <button type="submit" class="delete-button">Eliminar</button>
+                                    </form>
+                                    <form method="GET" action="{{ url_for('actualizar_restaurante', restaurante_id=restaurante.id) }}" style="display:inline;">
+                                        <button type="submit" class="form-group">Actualizar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <p class="empty-cart">No hay restaurantes registrados.</p>
+                {% endif %}
+                <h2>Menús Existentes</h2>
+                {% if menus %}
+                    <table class="carrito-table">
+                        <tr>
+                            <th>ID</th>
+                            <th>Restaurante</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                        {% for menu in menus %}
+                            <tr>
+                                <td>{{ menu.id }}</td>
+                                <td>{{ menu.restaurante.nombre }}</td>
+                                <td>{{ menu.nombre }}</td>
+                                <td>{{ menu.categoria }}</td>
+                                <td>${{ menu.precio }}</td>
+                                <td>{{ menu.descripcion }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('eliminar_menu', menu_id=menu.id) }}" style="display:inline;">
+                                        <button type="submit" class="delete-button">Eliminar</button>
+                                    </form>
+                                    <form method="GET" action="{{ url_for('actualizar_menu', menu_id=menu.id) }}" style="display:inline;">
+                                        <button type="submit" class="form-group">Actualizar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <p class="empty-cart">No hay menús registrados.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 SaboresExpress. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        function openTab(tabName) {
+            var i, tabcontent, tabbuttons;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tabbuttons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].classList.remove("active");
+            }
+            document.getElementById(tabName).style.display = "block";
+            event.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>

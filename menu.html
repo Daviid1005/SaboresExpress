@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaboresExpress</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="with-background">
+<body>
+    <header>
+        <div class="header-actions-left">
+            <a href="{{ url_for('restaurantes') }}" class="back-button">Volver a Restaurantes</a>
+        </div>
+        <h1>SaboresExpress</h1>
+        <p>Menú de {{ restaurante.nombre }}</p>
+        <div class="header-actions">
+            {% if 'user_id' in session %}
+                <button id="carritoButton" class="cart-button">Carrito ({{ carrito_items | length }})</button>
+                <a href="{{ url_for('logout') }}" class="logout">Cerrar Sesión</a>
+            {% elif 'guest' in session %}
+                <a href="{{ url_for('logout') }}" class="logout">Salir del Modo Invitado</a>
+            {% endif %}
+        </div>
+    </header>
+    <div id="carritoModal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Carrito</h2>
+            {% if carrito_items %}
+                <table class="carrito-table">
+                    <thead>
+                        <tr>
+                            <th>Ítem</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Subtotal</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in carrito_items %}
+                            <tr>
+                                <td>{{ item.nombre }}</td>
+                                <td>{{ item.cantidad }}</td>
+                                <td>${{ item.precio }}</td>
+                                <td>${{ item.subtotal }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('eliminar_carrito', restaurante_id=restaurante.id, menu_id=item.menu_id) }}">
+                                        <button type="submit" class="delete-button">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="4"><strong>Total</strong></td>
+                            <td><strong>${{ total }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% if 'user_id' in session %}
+                    <button id="confirmarPedidoButton" class="carrito-button">Confirmar Pedido</button>
+                {% endif %}
+            {% else %}
+                <p class="empty-cart">El carrito está vacío.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div id="confirmarPedidoModal" class="modal">
+        <div class="modal-content pedido-modal">
+            <span class="close">×</span>
+            <h2>Confirmar Pedido</h2>
+            <form method="POST" action="{{ url_for('confirmar_pedido', restaurante_id=restaurante.id) }}" id="confirmarPedidoForm">
+                <div class="form-group">
+                    <label for="tipo_entrega">Tipo de Entrega:</label>
+                    <select id="tipo_entrega" name="tipo_entrega" required onchange="toggleEntregaFields()">
+                        <option value="domicilio">Entrega a Domicilio</option>
+                        <option value="reserva">Reserva en el Local</option>
+                    </select>
+                </div>
+                <div id="domicilioFields" class="delivery-fields">
+                    <h3>Detalles de Entrega a Domicilio</h3>
+                    <div class="form-group">
+                        <label for="direccion">Dirección:</label>
+                        <input type="text" id="direccion" name="direccion" placeholder="Ej: Calle 123, Ciudad">
+                    </div>
+                    <div class="form-group">
+                        <label for="numero_celular">Número de Celular:</label>
+                        <input type="tel" id="numero_celular" name="numero_celular" placeholder="Ej: 123-456-7890">
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre_cliente_domicilio">Nombre del Cliente:</label>
+                        <input type="text" id="nombre_cliente_domicilio" name="nombre_cliente" placeholder="Tu nombre">
+                    </div>
+                </div>
+                <div id="reservaFields" class="reservation-fields" style="display: none;">
+                    <h3>Detalles de Reserva</h3>
+                    <div class="form-group">
+                        <label for="nombre_cliente_reserva">Nombre del Cliente:</label>
+                        <input type="text" id="nombre_cliente_reserva" name="nombre_cliente" placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="hora_reserva">Hora:</label>
+                        <input type="time" id="hora_reserva" name="hora_reserva">
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha_reserva">Fecha:</label>
+                        <input type="date" id="fecha_reserva" name="fecha_reserva" min="{{ current_date }}">
+                    </div>
+                </div>
+                <input type="hidden" name="metodo_pago" value="{{ session.get('metodo_pago') }}">
+                <button type="submit" class="submit-button">Finalizar Pedido</button>
+            </form>
+        </div>
+    </div>
+    <div class="main-with-sidebar">
+        <div class="sidebar">
+            <h3>Menús Populares</h3>
+            <ul class="popular-list">
+                {% for menu, count, restaurante in menus_populares %}
+                    <li>
+                        <a href="{{ url_for('menu', restaurante_id=restaurante.id) }}#menu-{{ menu.id }}">
+                            {{ menu.nombre }} ({{ restaurante.nombre }})
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="content">
+            <div class="search-bar">
+                <form method="GET" action="{{ url_for('menu', restaurante_id=restaurante.id) }}">
+                    <label for="busqueda">Buscar en el Menú:</label>
+                    <input type="text" id="busqueda" name="busqueda" value="{{ busqueda }}">
+                    <button type="submit">Buscar</button>
+                </form>
+            </div>
+            <div class="menu-grid">
+                <h2>Menú</h2>
+                {% if menus %}
+                    <div class="grid-container">
+                        {% for item in menus %}
+                            <div class="menu-card" id="menu-{{ item.id }}">
+                                <img src="{{ url_for('static', filename=item.imagen) }}" alt="{{ item.nombre }}" class="menu-image">
+                                <div class="menu-info">
+                                    <h3>{{ item.nombre }}</h3>
+                                    <p>{{ item.descripcion }}</p>
+                                    <p><strong>Precio:</strong> ${{ item.precio }}</p>
+                                    <p><strong>Categoría:</strong> {{ item.categoria }}</p>
+                                    {% if 'user_id' in session %}
+                                        <form method="POST" action="{{ url_for('agregar_carrito', restaurante_id=restaurante.id, menu_id=item.id) }}">
+                                            <label for="cantidad-{{ item.id }}">Cantidad:</label>
+                                            <input type="number" id="cantidad-{{ item.id }}" name="cantidad" min="1" value="1">
+                                            <button type="submit">Añadir al Carrito</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No se encontraron ítems en el menú.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>© 2025 SaboresExpress. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+        var carritoModal = document.getElementById("carritoModal");
+        var carritoBtn = document.getElementById("carritoButton");
+        var carritoSpan = carritoModal.getElementsByClassName("close")[0];
+        carritoBtn.onclick = function() {
+            carritoModal.style.display = "block";
+        }
+        carritoSpan.onclick = function() {
+            carritoModal.style.display = "none";
+        }
+
+        var confirmarModal = document.getElementById("confirmarPedidoModal");
+        var confirmarBtn = document.getElementById("confirmarPedidoButton");
+        var confirmarSpan = confirmarModal.getElementsByClassName("close")[0];
+        confirmarBtn.onclick = function() {
+            carritoModal.style.display = "none";
+            confirmarModal.style.display = "block";
+        }
+        confirmarSpan.onclick = function() {
+            confirmarModal.style.display = "none";
+        }
+
+        function toggleEntregaFields() {
+            var tipoEntrega = document.getElementById("tipo_entrega").value;
+            var domicilioFields = document.getElementById("domicilioFields");
+            var reservaFields = document.getElementById("reservaFields");
+            if (tipoEntrega === "domicilio") {
+                domicilioFields.style.display = "block";
+                reservaFields.style.display = "none";
+                setRequiredFields(domicilioFields, true);
+                setRequiredFields(reservaFields, false);
+            } else {
+                domicilioFields.style.display = "none";
+                reservaFields.style.display = "block";
+                setRequiredFields(domicilioFields, false);
+                setRequiredFields(reservaFields, true);
+            }
+        }
+
+        function setRequiredFields(container, required) {
+            var inputs = container.getElementsByTagName("input");
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].required = required;
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == carritoModal) {
+                carritoModal.style.display = "none";
+            }
+            if (event.target == confirmarModal) {
+                confirmarModal.style.display = "none";
+            }
+        }
+
+        document.getElementById("fecha_reserva").min = new Date().toISOString().split("T")[0];
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaboresExpress - Confirmar Pedido</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>SaboresExpress</h1>
+        <p>Confirmar Pedido</p>
+        <div class="header-actions">
+            <a href="{{ url_for('logout') }}" class="logout">Cerrar Sesión</a>
+        </div>
+    </header>
+    <div class="content">
+        <div class="carrito">
+            <h2>Confirmar Pedido</h2>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <p class="mensaje">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% if carrito %}
+                <table class="carrito-table">
+                    <thead>
+                        <tr>
+                            <th>Ítem</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in carrito %}
+                            <tr>
+                                <td>{{ item.nombre }}</td>
+                                <td>{{ item.cantidad }}</td>
+                                <td>${{ item.precio }}</td>
+                                <td>${{ item.subtotal }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="3"><strong>Total</strong></td>
+                            <td><strong>${{ total }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% if tipo_entrega %}
+                    <form method="POST" action="{{ url_for('confirmar_pedido', restaurante_id=restaurante_id) }}">
+                        {% if tipo_entrega == 'domicilio' %}
+                            <h3>Detalles de Entrega a Domicilio</h3>
+                            <label for="nombre">Nombre del Destinatario:</label>
+                            <input type="text" id="nombre" name="nombre" required>
+                            <label for="direccion">Dirección:</label>
+                            <input type="text" id="direccion" name="direccion" required>
+                            <label for="telefono">Teléfono de Contacto:</label>
+                            <input type="tel" id="telefono" name="telefono" required>
+                        {% elif tipo_entrega == 'reserva' %}
+                            <h3>Detalles de Reserva</h3>
+                            <label for="nombre">Nombre del Reservante:</label>
+                            <input type="text" id="nombre" name="nombre" required>
+                            <label for="fecha">Fecha:</label>
+                            <input type="date" id="fecha" name="fecha" required>
+                            <label for="hora">Hora:</label>
+                            <input type="time" id="hora" name="hora" required>
+                            <label for="personas">Número de Personas:</label>
+                            <input type="number" id="personas" name="personas" min="1" required>
+                        {% endif %}
+                        <input type="hidden" name="tipo_entrega" value="{{ tipo_entrega }}">
+                        <button type="submit" class="carrito-button">Confirmar</button>
+                    </form>
+                {% else %}
+                    <form method="GET" action="{{ url_for('confirmar_pedido', restaurante_id=restaurante_id) }}">
+                        <label for="tipo_entrega">Tipo de Entrega:</label>
+                        <select id="tipo_entrega" name="tipo_entrega" required>
+                            <option value="domicilio">Entrega a Domicilio</option>
+                            <option value="reserva">Reserva en el Local</option>
+                        </select>
+                        <button type="submit" class="carrito-button">Continuar</button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <p>El carrito está vacío.</p>
+            {% endif %}
+        </div>
+    </div>
+    <footer>
+        <p>© 2025 SaboresExpress. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

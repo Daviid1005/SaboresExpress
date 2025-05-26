@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaboresExpress - Actualizar Menú</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>SaboresExpress</h1>
+        <p>Actualizar Menú</p>
+        <div class="header-actions">
+            <a href="{{ url_for('logout') }}" class="logout">Cerrar Sesión</a>
+        </div>
+    </header>
+
+    <div class="main-with-sidebar">
+        <div class="content">
+            <h2>Actualizar Menú</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="restaurante_id">Restaurante:</label>
+                    <select id="restaurante_id" name="restaurante_id">
+                        {% for restaurante in restaurantes %}
+                            <option value="{{ restaurante.id }}" {% if restaurante.id == menu.restaurante_id %}selected{% endif %}>{{ restaurante.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" value="{{ menu.nombre }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion">{{ menu.descripcion }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="precio">Precio:</label>
+                    <input type="number" id="precio" name="precio" step="0.01" value="{{ menu.precio }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="categoria">Categoría:</label>
+                    <select id="categoria" name="categoria">
+                        <option value="Entradas" {% if menu.categoria == 'Entradas' %}selected{% endif %}>Entradas</option>
+                        <option value="Platos Fuertes" {% if menu.categoria == 'Platos Fuertes' %}selected{% endif %}>Platos Fuertes</option>
+                        <option value="Bebidas" {% if menu.categoria == 'Bebidas' %}selected{% endif %}>Bebidas</option>
+                        <option value="Rollitos" {% if menu.categoria == 'Rollitos' %}selected{% endif %}>Rollitos</option>
+                        <option value="Comidas Rápidas" {% if menu.categoria == 'Comidas Rápidas' %}selected{% endif %}>Comidas Rápidas</option>
+                        <option value="Pizzas" {% if menu.categoria == 'Pizzas' %}selected{% endif %}>Pizzas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="imagen">Imagen:</label>
+                    <input type="file" id="imagen" name="imagen" accept="image/*">
+                    <p>Imagen actual: {{ menu.imagen }}</p>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Actualizar Menú</button>
+                </div>
+            </form>
+            <a href="{{ url_for('admin') }}" class="back-button">Volver a Administración</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 SaboresExpress. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

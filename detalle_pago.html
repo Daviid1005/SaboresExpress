@@ -1,0 +1,27 @@
+<form method="POST" action="{{ url_for('detalle_pago') }}">
+    <input type="hidden" name="metodo_pago" value="{{ metodo_pago }}">
+    {% if metodo_pago == 'tarjeta' %}
+        <h3>Detalles de Tarjeta</h3>
+        <label for="numero_tarjeta">Número de Tarjeta:</label>
+        <input type="text" id="numero_tarjeta" name="numero_tarjeta" placeholder="1234 5678 9012 3456" required>
+        <label for="fecha_expiracion">Fecha de Expiración:</label>
+        <input type="text" id="fecha_expiracion" name="fecha_expiracion" placeholder="MM/YY" required>
+        <label for="cvv">CVV:</label>
+        <input type="text" id="cvv" name="cvv" placeholder="123" required>
+    {% elif metodo_pago == 'banca_movil' %}
+        <h3>Detalles de Banca Móvil</h3>
+        <label for="banco">Banco:</label>
+        <input type="text" id="banco" name="banco" required>
+        <label for="numero_cuenta">Número de Cuenta:</label>
+        <input type="text" id="numero_cuenta" name="numero_cuenta" required>
+    {% elif metodo_pago == 'transferencia' %}
+        <h3>Detalles de Transferencia</h3>
+        <label for="banco">Banco:</label>
+        <input type="text" id="banco" name="banco" required>
+        <label for="numero_cuenta">Número de Cuenta:</label>
+        <input type="text" id="numero_cuenta" name="numero_cuenta" required>
+        <label for="referencia">Referencia:</label>
+        <input type="text" id="referencia" name="referencia" required>
+    {% endif %}
+    <button type="submit" class="carrito-button">Guardar</button>
+</form>

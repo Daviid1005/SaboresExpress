@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaboresExpress</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="with-background">
+<body>
+    <header>
+        <h1>SaboresExpress</h1>
+        <p>¡Explora los mejores restaurantes!</p>
+        <div class="header-actions">
+            {% if 'user_id' in session %}
+                <a href="{{ url_for('logout') }}" class="logout">Cerrar Sesión</a>
+            {% elif 'guest' in session %}
+                <a href="{{ url_for('logout') }}" class="logout">Salir del Modo Invitado</a>
+            {% endif %}
+        </div>
+    </header>
+    <div class="main-with-sidebar">
+        <div class="sidebar">
+            <h3>Restaurantes Populares</h3>
+            <ul class="popular-list">
+                {% for restaurante, count in restaurantes_populares %}
+                    <li>
+                        <a href="{{ url_for('menu', restaurante_id=restaurante.id) }}">
+                            {{ restaurante.nombre }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="content">
+            <div class="search-bar">
+                <form method="GET" action="{{ url_for('restaurantes') }}">
+                    <label for="busqueda">Buscar Restaurante:</label>
+                    <input type="text" id="busqueda" name="busqueda" value="{{ busqueda }}">
+                    <button type="submit">Buscar</button>
+                </form>
+            </div>
+            <div class="restaurantes-grid">
+                <h2>Restaurantes</h2>
+                {% if restaurantes %}
+                    <div class="category-sections">
+                        <!-- Sección Sushi -->
+                        <div class="category-section">
+                            <h3>Sushi</h3>
+                            <div class="grid-container">
+                                {% for restaurante in restaurantes | selectattr('categoria', 'equalto', 'Sushi') %}
+                                    <div class="restaurant-card">
+                                        <img src="{{ url_for('static', filename=restaurante.imagen) }}" alt="{{ restaurante.nombre }}" class="restaurant-image">
+                                        <div class="restaurant-info">
+                                            <h3>
+                                                <a href="{{ url_for('menu', restaurante_id=restaurante.id) }}">
+                                                    {{ restaurante.nombre }}
+                                                </a>
+                                            </h3>
+                                            <p>{{ restaurante.descripcion }}</p>
+                                            <p><strong>Categoría:</strong> {{ restaurante.categoria }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Sección Pollo -->
+                        <div class="category-section">
+                            <h3>Pollo</h3>
+                            <div class="grid-container">
+                                {% for restaurante in restaurantes | selectattr('categoria', 'equalto', 'Pollo') %}
+                                    <div class="restaurant-card">
+                                        <img src="{{ url_for('static', filename=restaurante.imagen) }}" alt="{{ restaurante.nombre }}" class="restaurant-image">
+                                        <div class="restaurant-info">
+                                            <h3>
+                                                <a href="{{ url_for('menu', restaurante_id=restaurante.id) }}">
+                                                    {{ restaurante.nombre }}
+                                                </a>
+                                            </h3>
+                                            <p>{{ restaurante.descripcion }}</p>
+                                            <p><strong>Categoría:</strong> {{ restaurante.categoria }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Sección Casa China -->
+                        <div class="category-section">
+                            <h3>Casa China</h3>
+                            <div class="grid-container">
+                                {% for restaurante in restaurantes | selectattr('categoria', 'equalto', 'Casa China') %}
+                                    <div class="restaurant-card">
+                                        <img src="{{ url_for('static', filename=restaurante.imagen) }}" alt="{{ restaurante.nombre }}" class="restaurant-image">
+                                        <div class="restaurant-info">
+                                            <h3>
+                                                <a href="{{ url_for('menu', restaurante_id=restaurante.id) }}">
+                                                    {{ restaurante.nombre }}
+                                                </a>
+                                            </h3>
+                                            <p>{{ restaurante.descripcion }}</p>
+                                            <p><strong>Categoría:</strong> {{ restaurante.categoria }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Sección Comidas Rápidas -->
+                        <div class="category-section">
+                            <h3>Comidas Rápidas</h3>
+                            <div class="grid-container">
+                                {% for restaurante in restaurantes | selectattr('categoria', 'equalto', 'Comidas Rápidas') %}
+                                    <div class="restaurant-card">
+                                        <img src="{{ url_for('static', filename=restaurante.imagen) }}" alt="{{ restaurante.nombre }}" class="restaurant-image">
+                                        <div class="restaurant-info">
+                                            <h3>
+                                                <a href="{{ url_for('menu', restaurante_id=restaurante.id) }}">
+                                                    {{ restaurante.nombre }}
+                                                </a>
+                                            </h3>
+                                            <p>{{ restaurante.descripcion }}</p>
+                                            <p><strong>Categoría:</strong> {{ restaurante.categoria }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No se encontraron restaurantes.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="formas-pago">
+            <h3>Formas de Pago</h3>
+            {% if 'user_id' in session %}
+                <div class="payment-options">
+                    <label><input type="radio" name="metodo_pago" value="tarjeta" onclick="openPaymentModal('tarjeta')"> Tarjeta</label>
+                    <label><input type="radio" name="metodo_pago" value="banca_movil" onclick="openPaymentModal('banca_movil')"> Banca Móvil</label>
+                    <label><input type="radio" name="metodo_pago" value="transferencia" onclick="openPaymentModal('transferencia')"> Transferencia</label>
+                </div>
+            {% else %}
+                <p>Por favor, inicia sesión para seleccionar un método de pago.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div id="paymentModal" class="modal">
+        <div class="modal-content payment-modal">
+            <span class="close">×</span>
+            <h2>Detalles del Método de Pago</h2>
+            <form method="POST" action="{{ url_for('seleccionar_pago') }}" id="paymentForm">
+                <input type="hidden" id="metodo_pago_hidden" name="metodo_pago">
+                <div id="tarjetaFields" class="payment-fields">
+                    <h3>Tarjeta de Crédito/Débito</h3>
+                    <div class="form-group">
+                        <label for="numero_tarjeta">Número de Tarjeta:</label>
+                        <input type="text" id="numero_tarjeta" name="numero_tarjeta" placeholder="1234-5678-9012-3456">
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha_vencimiento">Fecha de Vencimiento (MM/AA):</label>
+                        <input type="text" id="fecha_vencimiento" name="fecha_vencimiento" placeholder="MM/AA">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV:</label>
+                        <input type="text" id="cvv" name="cvv" placeholder="123">
+                    </div>
+                </div>
+                <div id="bancaMovilFields" class="payment-fields" style="display: none;">
+                    <h3>Banca Móvil</h3>
+                    <div class="form-group">
+                        <label for="numero_celular">Número de Celular:</label>
+                        <input type="tel" id="numero_celular" name="numero_celular" placeholder="Ej: 123-456-7890">
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre_titular">Nombre del Titular:</label>
+                        <input type="text" id="nombre_titular" name="nombre_titular" placeholder="Tu nombre">
+                    </div>
+                </div>
+                <div id="transferenciaFields" class="payment-fields" style="display: none;">
+                    <h3>Transferencia Bancaria</h3>
+                    <div class="form-group">
+                        <label for="numero_cuenta">Número de Cuenta:</label>
+                        <input type="text" id="numero_cuenta" name="numero_cuenta" placeholder="Ej: 1234567890">
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre_titular">Nombre del Titular:</label>
+                        <input type="text" id="nombre_titular" name="nombre_titular" placeholder="Tu nombre">
+                    </div>
+                </div>
+                <button type="submit" class="submit-button">Guardar Método de Pago</button>
+            </form>
+        </div>
+    </div>
+    <footer>
+        <p>© 2025 SaboresExpress. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+        var paymentModal = document.getElementById("paymentModal");
+        var paymentSpan = paymentModal.getElementsByClassName("close")[0];
+
+        function openPaymentModal(metodo) {
+            document.getElementById("metodo_pago_hidden").value = metodo;
+            document.getElementById("tarjetaFields").style.display = metodo === "tarjeta" ? "block" : "none";
+            document.getElementById("bancaMovilFields").style.display = metodo === "banca_movil" ? "block" : "none";
+            document.getElementById("transferenciaFields").style.display = metodo === "transferencia" ? "block" : "none";
+
+            setRequiredFields(document.getElementById("tarjetaFields"), metodo === "tarjeta");
+            setRequiredFields(document.getElementById("bancaMovilFields"), metodo === "banca_movil");
+            setRequiredFields(document.getElementById("transferenciaFields"), metodo === "transferencia");
+
+            paymentModal.style.display = "block";
+        }
+
+        function setRequiredFields(container, required) {
+            var inputs = container.getElementsByTagName("input");
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].required = required;
+            }
+        }
+
+        paymentSpan.onclick = function() {
+            paymentModal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == paymentModal) {
+                paymentModal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html> 

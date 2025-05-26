@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaboresExpress - Actualizar Restaurante</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>SaboresExpress</h1>
+        <p>Actualizar Restaurante</p>
+        <div class="header-actions">
+            <a href="{{ url_for('logout') }}" class="logout">Cerrar Sesión</a>
+        </div>
+    </header>
+
+    <div class="main-with-sidebar">
+        <div class="content">
+            <h2>Actualizar Restaurante</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" value="{{ restaurante.nombre }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion">{{ restaurante.descripcion }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="categoria">Categoría:</label>
+                    <select id="categoria" name="categoria">
+                        <option value="Sushi" {% if restaurante.categoria == 'Sushi' %}selected{% endif %}>Sushi</option>
+                        <option value="Pollo" {% if restaurante.categoria == 'Pollo' %}selected{% endif %}>Pollo</option>
+                        <option value="Casa China" {% if restaurante.categoria == 'Casa China' %}selected{% endif %}>Casa China</option>
+                        <option value="Comidas Rápidas" {% if restaurante.categoria == 'Comidas Rápidas' %}selected{% endif %}>Comidas Rápidas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="imagen">Imagen:</label>
+                    <input type="file" id="imagen" name="imagen" accept="image/*">
+                    <p>Imagen actual: {{ restaurante.imagen }}</p>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Actualizar Restaurante</button>
+                </div>
+            </form>
+            <a href="{{ url_for('admin') }}" class="back-button">Volver a Administración</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 SaboresExpress. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>
